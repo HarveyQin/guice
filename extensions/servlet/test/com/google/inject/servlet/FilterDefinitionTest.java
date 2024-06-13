@@ -124,7 +124,6 @@ public class FilterDefinitionTest extends TestCase {
   public final void testFilterCreateDispatchDestroySupressChain()
       throws ServletException, IOException {
 
-
     Binding<Filter> binding = mock(Binding.class);
     HttpServletRequest request = mock(HttpServletRequest.class);
 
@@ -220,7 +219,6 @@ public class FilterDefinitionTest extends TestCase {
             null);
     HttpServletRequest servletRequest = mock(HttpServletRequest.class);
     ServletContext servletContext = mock(ServletContext.class);
-
     @SuppressWarnings("unchecked") // Safe because mock will only ever return Filter
     Binding<Filter> binding = mock(Binding.class);
 
