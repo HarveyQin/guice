@@ -26,8 +26,9 @@ import junit.framework.TestCase;
 
 /**
  * Tests the lifecycle of the encapsulated {@link FilterDefinition} class.
- *
+ * 
  * @author Dhanji R. Prasanna (dhanji@gmail com)
+ * test
  */
 @SuppressWarnings("unchecked") // Safe because mocks can only return the required types.
 public class FilterDefinitionTest extends TestCase {
