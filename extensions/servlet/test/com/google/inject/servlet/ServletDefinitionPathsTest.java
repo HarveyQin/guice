@@ -151,7 +151,7 @@ public class ServletDefinitionPathsTest extends TestCase {
 
     Injector injector = mock(Injector.class);
     Binding<HttpServlet> binding = mock(Binding.class);
-    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletRequest request = createRequest(requestUri, contextPath, servletPath);
     HttpServletResponse response = mock(HttpServletResponse.class);
 
     when(binding.acceptScopingVisitor((BindingScopingVisitor<Boolean>) any())).thenReturn(true);
@@ -187,14 +187,6 @@ public class ServletDefinitionPathsTest extends TestCase {
                 run[0] = true;
               }
             });
-
-    when(request.getRequestURI()).thenReturn(requestUri);
-
-    when(request.getServletPath()).thenReturn(servletPath);
-
-    when(request.getContextPath()).thenReturn(contextPath);
-
-    when(request.getAttribute(REQUEST_DISPATCHER_REQUEST)).thenReturn(null);
 
     ServletDefinition servletDefinition =
         new ServletDefinition(
@@ -258,7 +250,7 @@ public class ServletDefinitionPathsTest extends TestCase {
 
     Injector injector = mock(Injector.class);
     Binding<HttpServlet> binding = mock(Binding.class);
-    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletRequest request = createRequest(requestUri, contextPath, servletPath);
     HttpServletResponse response = mock(HttpServletResponse.class);
 
     when(binding.acceptScopingVisitor((BindingScopingVisitor<Boolean>) any())).thenReturn(true);
@@ -295,14 +287,6 @@ public class ServletDefinitionPathsTest extends TestCase {
               }
             });
 
-    when(request.getRequestURI()).thenReturn(requestUri);
-
-    when(request.getServletPath()).thenReturn(servletPath);
-
-    when(request.getContextPath()).thenReturn(contextPath);
-
-    when(request.getAttribute(REQUEST_DISPATCHER_REQUEST)).thenReturn(null);
-
     ServletDefinition servletDefinition =
         new ServletDefinition(
             Key.get(HttpServlet.class),
@@ -314,5 +298,17 @@ public class ServletDefinitionPathsTest extends TestCase {
     servletDefinition.doService(request, response);
 
     assertTrue("Servlet did not run!", run[0]);
+  }
+
+  private HttpServletRequest createRequest(
+      String requestUri,
+      String contextPath,
+      String servletPath) {
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    when(request.getRequestURI()).thenReturn(requestUri);
+    when(request.getServletPath()).thenReturn(servletPath);
+    when(request.getContextPath()).thenReturn(contextPath);
+    when(request.getAttribute(REQUEST_DISPATCHER_REQUEST)).thenReturn(null);
+    return request;
   }
 }
