@@ -101,13 +101,8 @@ public class ContextPathTest extends TestCase {
 
   public void testSimple() throws Exception {
     TestFilterChain testFilterChain = new TestFilterChain();
-    HttpServletRequest req = mock(HttpServletRequest.class);
+    HttpServletRequest req = createReq("GET", "/bar/foo", "/bar/foo", "");
     HttpServletResponse res = mock(HttpServletResponse.class);
-
-    when(req.getMethod()).thenReturn("GET");
-    when(req.getRequestURI()).thenReturn("/bar/foo");
-    when(req.getServletPath()).thenReturn("/bar/foo");
-    when(req.getContextPath()).thenReturn("");
 
     guiceFilter.doFilter(req, res, testFilterChain);
 
@@ -224,13 +219,8 @@ public class ContextPathTest extends TestCase {
     fooServlet.clear();
 
     TestFilterChain testFilterChain = new TestFilterChain();
-    HttpServletRequest req = mock(HttpServletRequest.class);
+    HttpServletRequest req = createReq("GET", requestURI, servletPath, contextPath);
     HttpServletResponse res = mock(HttpServletResponse.class);
-
-    when(req.getMethod()).thenReturn("GET");
-    when(req.getRequestURI()).thenReturn(requestURI);
-    when(req.getServletPath()).thenReturn(servletPath);
-    when(req.getContextPath()).thenReturn(contextPath);
 
     guiceFilter.doFilter(req, res, testFilterChain);
 
@@ -273,4 +263,17 @@ public class ContextPathTest extends TestCase {
       triggered = false;
     }
   }
+
+  private HttpServletRequest createReq(
+          String getMethod,
+          String requestURI,
+          String servletPath,
+          String contextPath
+  ) {
+    HttpServletRequest req = mock(HttpServletRequest.class);
+    when(req.getMethod()).thenReturn(getMethod);
+    when(req.getRequestURI()).thenReturn(requestURI);
+    when(req.getServletPath()).thenReturn(servletPath);
+    when(req.getContextPath()).thenReturn(contextPath);
+  return req;}
 }
