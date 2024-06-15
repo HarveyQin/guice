@@ -208,10 +208,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
   }
 
   public final void testWrappedRequestUriAndUrlConsistency() {
-    final HttpServletRequest mockRequest = mock(HttpServletRequest.class);
-    when(mockRequest.getScheme()).thenReturn("http");
-    when(mockRequest.getServerName()).thenReturn("the.server");
-    when(mockRequest.getServerPort()).thenReturn(12345);
+    final HttpServletRequest mockRequest = createMockRequest("http","the.server", 12345);
 
     HttpServletRequest wrappedRequest = ManagedServletPipeline.wrapRequest(mockRequest, "/new-uri");
     assertEquals("/new-uri", wrappedRequest.getRequestURI());
@@ -219,10 +216,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
   }
 
   public final void testWrappedRequestUrlNegativePort() {
-    final HttpServletRequest mockRequest = mock(HttpServletRequest.class);
-    when(mockRequest.getScheme()).thenReturn("http");
-    when(mockRequest.getServerName()).thenReturn("the.server");
-    when(mockRequest.getServerPort()).thenReturn(-1);
+    final HttpServletRequest mockRequest = createMockRequest("http", "the.server", -1);
 
     HttpServletRequest wrappedRequest = ManagedServletPipeline.wrapRequest(mockRequest, "/new-uri");
     assertEquals("/new-uri", wrappedRequest.getRequestURI());
@@ -230,10 +224,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
   }
 
   public final void testWrappedRequestUrlDefaultPort() {
-    final HttpServletRequest mockRequest = mock(HttpServletRequest.class);
-    when(mockRequest.getScheme()).thenReturn("http");
-    when(mockRequest.getServerName()).thenReturn("the.server");
-    when(mockRequest.getServerPort()).thenReturn(80);
+    final HttpServletRequest mockRequest = createMockRequest("http", "the.server", 80);
 
     HttpServletRequest wrappedRequest = ManagedServletPipeline.wrapRequest(mockRequest, "/new-uri");
     assertEquals("/new-uri", wrappedRequest.getRequestURI());
@@ -241,10 +232,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
   }
 
   public final void testWrappedRequestUrlDefaultHttpsPort() {
-    final HttpServletRequest mockRequest = mock(HttpServletRequest.class);
-    when(mockRequest.getScheme()).thenReturn("https");
-    when(mockRequest.getServerName()).thenReturn("the.server");
-    when(mockRequest.getServerPort()).thenReturn(443);
+    final HttpServletRequest mockRequest = createMockRequest("https", "the.server", 443);
 
     HttpServletRequest wrappedRequest = ManagedServletPipeline.wrapRequest(mockRequest, "/new-uri");
     assertEquals("/new-uri", wrappedRequest.getRequestURI());
@@ -263,5 +251,17 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
     when(mockBinding.getProvider()).thenReturn(bindingProvider);
 
     return injector;
+  }
+
+  private HttpServletRequest createMockRequest(
+          String scheme,
+          String serverName,
+          Integer serverPort
+  ) {
+    HttpServletRequest mockRequest = mock(HttpServletRequest.class);
+    when(mockRequest.getScheme()).thenReturn(scheme);
+    when(mockRequest.getServerName()).thenReturn(serverName);
+    when(mockRequest.getServerPort()).thenReturn(serverPort);
+    return mockRequest;
   }
 }
