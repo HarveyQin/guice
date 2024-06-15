@@ -126,13 +126,8 @@ public class ContinuingRequestIntegrationTest extends TestCase {
 
     GuiceFilter guiceFilter = injector.getInstance(GuiceFilter.class);
 
-    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletRequest request = createRequest();
     HttpServletResponse response = mock(HttpServletResponse.class);
-
-    when(request.getRequestURI()).thenReturn("/");
-    when(request.getContextPath()).thenReturn("");
-    when(request.getMethod()).thenReturn("GET");
-    when(request.getCookies()).thenReturn(new Cookie[0]);
 
     FilterChain filterChain = mock(FilterChain.class);
     when(request.getParameter(PARAM_NAME)).thenReturn(PARAM_VALUE);
@@ -168,14 +163,9 @@ public class ContinuingRequestIntegrationTest extends TestCase {
 
     GuiceFilter guiceFilter = injector.getInstance(GuiceFilter.class);
 
-    HttpServletRequest request = mock(HttpServletRequest.class);
+    HttpServletRequest request = createRequest();
     HttpServletResponse response = mock(HttpServletResponse.class);
 
-    when(request.getRequestURI()).thenReturn("/");
-    when(request.getContextPath()).thenReturn("");
-
-    when(request.getMethod()).thenReturn("GET");
-    when(request.getCookies()).thenReturn(new Cookie[0]);
     FilterChain filterChain = mock(FilterChain.class);
 
     guiceFilter.init(filterConfig);
@@ -232,4 +222,13 @@ public class ContinuingRequestIntegrationTest extends TestCase {
       return value = request.get().getParameter(PARAM_NAME);
     }
   }
+
+  private HttpServletRequest createRequest() {
+      HttpServletRequest request = mock(HttpServletRequest.class);
+      when(request.getRequestURI()).thenReturn("/");
+      when(request.getContextPath()).thenReturn("");
+      when(request.getMethod()).thenReturn("GET");
+      when(request.getCookies()).thenReturn(new Cookie[0]);
+      return request;
+    }
 }

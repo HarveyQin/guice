@@ -66,7 +66,6 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
             new HashMap<String, String>(),
             null);
 
-    final Injector injector = mock(Injector.class);
     final Binding<HttpServlet> binding = mock(Binding.class);
     final HttpServletRequest requestMock = mock(HttpServletRequest.class);
 
@@ -87,16 +86,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
         };
 
     when(binding.acceptScopingVisitor((BindingScopingVisitor) any())).thenReturn(true);
-    when(injector.getBinding(Key.get(HttpServlet.class))).thenReturn(binding);
-    when(injector.getInstance(HTTP_SERLVET_KEY)).thenReturn(mockServlet);
-
-    final Key<ServletDefinition> servetDefsKey = Key.get(TypeLiteral.get(ServletDefinition.class));
-
-    Binding<ServletDefinition> mockBinding = mock(Binding.class);
-    when(injector.findBindingsByType(eq(servetDefsKey.getTypeLiteral())))
-        .thenReturn(ImmutableList.<Binding<ServletDefinition>>of(mockBinding));
-    Provider<ServletDefinition> bindingProvider = Providers.of(servletDefinition);
-    when(mockBinding.getProvider()).thenReturn(bindingProvider);
+    final Injector injector = createInjector(binding, mockServlet, servletDefinition);
 
     // Have to init the Servlet before we can dispatch to it.
     servletDefinition.init(null, injector, Sets.<HttpServlet>newIdentityHashSet());
@@ -122,7 +112,6 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
             new HashMap<String, String>(),
             null);
 
-    final Injector injector = mock(Injector.class);
     final Binding<HttpServlet> binding = mock(Binding.class);
     final HttpServletRequest requestMock = mock(HttpServletRequest.class);
     final HttpServletResponse mockResponse = mock(HttpServletResponse.class);
@@ -146,17 +135,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
         };
 
     when(binding.acceptScopingVisitor((BindingScopingVisitor) any())).thenReturn(true);
-    when(injector.getBinding(Key.get(HttpServlet.class))).thenReturn(binding);
-
-    when(injector.getInstance(HTTP_SERLVET_KEY)).thenReturn(mockServlet);
-
-    final Key<ServletDefinition> servetDefsKey = Key.get(TypeLiteral.get(ServletDefinition.class));
-
-    Binding<ServletDefinition> mockBinding = mock(Binding.class);
-    when(injector.findBindingsByType(eq(servetDefsKey.getTypeLiteral())))
-        .thenReturn(ImmutableList.<Binding<ServletDefinition>>of(mockBinding));
-    Provider<ServletDefinition> bindingProvider = Providers.of(servletDefinition);
-    when(mockBinding.getProvider()).thenReturn(bindingProvider);
+    final Injector injector = createInjector(binding, mockServlet, servletDefinition);
 
     // Have to init the Servlet before we can dispatch to it.
     servletDefinition.init(null, injector, Sets.<HttpServlet>newIdentityHashSet());
@@ -196,7 +175,6 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
             new HashMap<String, String>(),
             null);
 
-    final Injector injector = mock(Injector.class);
     final Binding<HttpServlet> binding = mock(Binding.class);
     final HttpServletRequest mockRequest = mock(HttpServletRequest.class);
     final HttpServletResponse mockResponse = mock(HttpServletResponse.class);
@@ -216,17 +194,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
         };
 
     when(binding.acceptScopingVisitor((BindingScopingVisitor) any())).thenReturn(true);
-    when(injector.getBinding(Key.get(HttpServlet.class))).thenReturn(binding);
-
-    when(injector.getInstance(Key.get(HttpServlet.class))).thenReturn(mockServlet);
-
-    final Key<ServletDefinition> servetDefsKey = Key.get(TypeLiteral.get(ServletDefinition.class));
-
-    Binding<ServletDefinition> mockBinding = mock(Binding.class);
-    when(injector.findBindingsByType(eq(servetDefsKey.getTypeLiteral())))
-        .thenReturn(ImmutableList.<Binding<ServletDefinition>>of(mockBinding));
-    Provider<ServletDefinition> bindingProvider = Providers.of(servletDefinition);
-    when(mockBinding.getProvider()).thenReturn(bindingProvider);
+    final Injector injector = createInjector(binding, mockServlet, servletDefinition);
 
     // Have to init the Servlet before we can dispatch to it.
     servletDefinition.init(null, injector, Sets.<HttpServlet>newIdentityHashSet());
@@ -240,10 +208,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
   }
 
   public final void testWrappedRequestUriAndUrlConsistency() {
-    final HttpServletRequest mockRequest = mock(HttpServletRequest.class);
-    when(mockRequest.getScheme()).thenReturn("http");
-    when(mockRequest.getServerName()).thenReturn("the.server");
-    when(mockRequest.getServerPort()).thenReturn(12345);
+    final HttpServletRequest mockRequest = createMockRequest("http","the.server", 12345);
 
     HttpServletRequest wrappedRequest = ManagedServletPipeline.wrapRequest(mockRequest, "/new-uri");
     assertEquals("/new-uri", wrappedRequest.getRequestURI());
@@ -251,10 +216,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
   }
 
   public final void testWrappedRequestUrlNegativePort() {
-    final HttpServletRequest mockRequest = mock(HttpServletRequest.class);
-    when(mockRequest.getScheme()).thenReturn("http");
-    when(mockRequest.getServerName()).thenReturn("the.server");
-    when(mockRequest.getServerPort()).thenReturn(-1);
+    final HttpServletRequest mockRequest = createMockRequest("http", "the.server", -1);
 
     HttpServletRequest wrappedRequest = ManagedServletPipeline.wrapRequest(mockRequest, "/new-uri");
     assertEquals("/new-uri", wrappedRequest.getRequestURI());
@@ -262,10 +224,7 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
   }
 
   public final void testWrappedRequestUrlDefaultPort() {
-    final HttpServletRequest mockRequest = mock(HttpServletRequest.class);
-    when(mockRequest.getScheme()).thenReturn("http");
-    when(mockRequest.getServerName()).thenReturn("the.server");
-    when(mockRequest.getServerPort()).thenReturn(80);
+    final HttpServletRequest mockRequest = createMockRequest("http", "the.server", 80);
 
     HttpServletRequest wrappedRequest = ManagedServletPipeline.wrapRequest(mockRequest, "/new-uri");
     assertEquals("/new-uri", wrappedRequest.getRequestURI());
@@ -273,13 +232,36 @@ public class ServletPipelineRequestDispatcherTest extends TestCase {
   }
 
   public final void testWrappedRequestUrlDefaultHttpsPort() {
-    final HttpServletRequest mockRequest = mock(HttpServletRequest.class);
-    when(mockRequest.getScheme()).thenReturn("https");
-    when(mockRequest.getServerName()).thenReturn("the.server");
-    when(mockRequest.getServerPort()).thenReturn(443);
+    final HttpServletRequest mockRequest = createMockRequest("https", "the.server", 443);
 
     HttpServletRequest wrappedRequest = ManagedServletPipeline.wrapRequest(mockRequest, "/new-uri");
     assertEquals("/new-uri", wrappedRequest.getRequestURI());
     assertEquals("https://the.server/new-uri", wrappedRequest.getRequestURL().toString());
+  }
+
+  private Injector createInjector(Binding<HttpServlet> binding, HttpServlet mockServlet, ServletDefinition servletDefinition) {
+    Injector injector = mock(Injector.class);
+    when(injector.getBinding(Key.get(HttpServlet.class))).thenReturn(binding);
+    when(injector.getInstance(HTTP_SERLVET_KEY)).thenReturn(mockServlet);
+    Key<ServletDefinition> servetDefsKey = Key.get(TypeLiteral.get(ServletDefinition.class));
+    Binding<ServletDefinition> mockBinding = mock(Binding.class);
+    when(injector.findBindingsByType(eq(servetDefsKey.getTypeLiteral())))
+        .thenReturn(ImmutableList.<Binding<ServletDefinition>>of(mockBinding));
+    Provider<ServletDefinition> bindingProvider = Providers.of(servletDefinition);
+    when(mockBinding.getProvider()).thenReturn(bindingProvider);
+
+    return injector;
+  }
+
+  private HttpServletRequest createMockRequest(
+          String scheme,
+          String serverName,
+          Integer serverPort
+  ) {
+    HttpServletRequest mockRequest = mock(HttpServletRequest.class);
+    when(mockRequest.getScheme()).thenReturn(scheme);
+    when(mockRequest.getServerName()).thenReturn(serverName);
+    when(mockRequest.getServerPort()).thenReturn(serverPort);
+    return mockRequest;
   }
 }
